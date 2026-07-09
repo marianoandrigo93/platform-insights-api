@@ -11,6 +11,18 @@ Este proyecto fue desarrollado como una demostración de una arquitectura cloud 
 
 ---
 
+# Estado del proyecto
+
+- ✅ API REST implementada
+- ✅ Documentación OpenAPI (Swagger)
+- ✅ Testing automatizado con Pytest
+- ✅ Contenerización con Docker
+- ⏳ Infraestructura como código con Terraform
+- ⏳ Despliegue en AWS
+- ⏳ Pipeline CI/CD con GitHub Actions
+
+---
+
 # Objetivos
 
 El objetivo de este proyecto es demostrar el diseño e implementación de una API preparada para producción que permita:
@@ -31,15 +43,15 @@ La siguiente arquitectura representa el despliegue de la solución en AWS.
 
 ## Componentes principales
 
-- Amazon Route53 para la resolución DNS.
-- AWS Certificate Manager (ACM) para la gestión del certificado TLS.
-- AWS WAF como capa adicional de protección frente a amenazas comunes.
-- Application Load Balancer como punto de entrada público y distribución del tráfico.
-- Amazon ECS Fargate para la ejecución de la aplicación sin administración de servidores.
-- Amazon ECR para el almacenamiento de imágenes Docker.
-- AWS Secrets Manager para la gestión segura de secretos.
+- Amazon Route53 para resolución DNS.
+- AWS Certificate Manager (ACM) para certificados TLS.
+- AWS WAF como capa adicional de protección.
+- Application Load Balancer como punto de entrada público.
+- Amazon ECS Fargate para ejecutar la aplicación.
+- Amazon ECR para almacenar imágenes Docker.
+- AWS Secrets Manager para la gestión de secretos.
 - Amazon CloudWatch para logs, métricas y alarmas.
-- AWS IAM para la gestión de permisos siguiendo el principio de mínimo privilegio.
+- AWS IAM siguiendo el principio de mínimo privilegio.
 
 ---
 
@@ -95,13 +107,70 @@ platform-insights-api/
 
 # Ejecución local
 
-> En construcción. Será completado una vez implementada la API.
+## Requisitos
+
+- Python 3.12
+- Docker Desktop
+
+## Ejecución con Python
+
+Desde el directorio `api/`:
+
+```bash
+python -m venv .venv
+
+# Windows
+.\.venv\Scripts\Activate.ps1
+
+pip install -r requirements.txt
+
+uvicorn app.main:app --reload
+```
+
+La aplicación quedará disponible en:
+
+- http://localhost:8000/health
+- http://localhost:8000/docs
+
+---
+
+## Ejecución con Docker
+
+Desde el directorio `api/`:
+
+```bash
+docker compose up --build
+```
+
+La aplicación quedará disponible en:
+
+- http://localhost:8000/health
+- http://localhost:8000/docs
+
+---
+
+## Ejecución de tests
+
+Desde el directorio `api/`:
+
+```bash
+pytest
+```
 
 ---
 
 # Despliegue
 
-> En construcción. Será completado una vez implementada la infraestructura con Terraform.
+La infraestructura será aprovisionada mediante Terraform y desplegada sobre AWS utilizando los siguientes servicios:
+
+- Amazon ECR
+- Amazon ECS Fargate
+- Application Load Balancer
+- AWS WAF
+- AWS Secrets Manager
+- Amazon CloudWatch
+
+El despliegue será automatizado mediante GitHub Actions.
 
 ---
 
@@ -120,7 +189,8 @@ La solución contempla:
 - Centralización de logs mediante Amazon CloudWatch Logs.
 - Publicación de métricas operacionales.
 - Alarmas configurables mediante CloudWatch Alarms.
-- Health Check para monitoreo del estado de la aplicación.
+- Endpoint `/health` para monitoreo del estado de la aplicación.
+- Documentación OpenAPI generada automáticamente mediante Swagger.
 
 ---
 
@@ -140,27 +210,43 @@ La arquitectura incorpora múltiples capas de seguridad:
 
 Las principales decisiones arquitectónicas y sus justificaciones se encuentran documentadas en:
 
-`docs/design-decisions.md`
+```
+docs/design-decisions.md
+```
 
 ---
 
-# Uso de Inteligencia Artificial
+# Flujo de despliegue
 
-Durante el desarrollo se utilizó IA como asistente de ingeniería para:
+El despliegue de la aplicación sigue el siguiente flujo:
 
-- Evaluar alternativas arquitectónicas.
+1. Construcción de la imagen Docker.
+2. Publicación de la imagen en Amazon ECR.
+3. Actualización de la infraestructura mediante Terraform.
+4. Registro de una nueva revisión de la ECS Task Definition.
+5. Rolling Update automático del ECS Service.
+
+# Uso de Inteligencia Artificial durante el desarrollo
+
+Durante el desarrollo de este proyecto se utilizó inteligencia artificial como asistente técnico para:
+
+- Evaluar alternativas de arquitectura.
 - Revisar decisiones de diseño.
 - Mejorar la documentación técnica.
-- Validar buenas prácticas de infraestructura y seguridad.
+- Validar buenas prácticas de desarrollo.
+- Revisar código.
+- Diseñar la estrategia de testing.
+- Diseñar la infraestructura como código.
 
-Las decisiones finales de arquitectura e implementación fueron revisadas y validadas manualmente.
+La inteligencia artificial fue utilizada exclusivamente como herramienta de asistencia. Todas las decisiones técnicas, implementaciones y validaciones finales fueron revisadas manualmente antes de incorporarse al proyecto.
 
 ---
 
 # Próximas Mejoras
 
-- Incorporar persistencia de datos.
-- Integración con métricas reales de AWS.
-- Implementar despliegues Blue/Green.
-- Incorporar pruebas de carga automatizadas.
-- Agregar tracing distribuido con AWS X-Ray u OpenTelemetry.
+- Integración con métricas reales provenientes de AWS CloudWatch.
+- Incorporación de persistencia de datos.
+- Implementación de despliegues Blue/Green.
+- Incorporación de OpenTelemetry para tracing distribuido.
+- Integración con Amazon X-Ray.
+- Implementación de autenticación y autorización mediante JWT.
