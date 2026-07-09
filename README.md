@@ -1,11 +1,10 @@
+## Repository
+
+GitHub: https://github.com/marianoandrigo93/platform-insights-api
+
 ## Quick Links
 
-- [Cómo ejecutar y desplegar](run.md)
-- [Decisiones de diseño](docs/design-decisions.md)
-- [Estrategia de rollback](docs/rollback-strategy.md)
-
-# Arquitectura
-
-La siguiente imagen representa la arquitectura de despliegue implementada para el proyecto.
-
-![Architecture](diagrams/architecture.png)
+- [Runbook](run.md)
+- [Design Decisions](docs/design-decisions.md)
+- [Rollback Strategy](docs/rollback-strategy.md)
+- [Architecture Diagram](diagrams/architecture.png)

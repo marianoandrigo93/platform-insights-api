@@ -6,6 +6,6 @@ variable "environment" {
   type = string
 }
 
-variable "  " {
+variable "alb_arn" {
   type = string
 }
