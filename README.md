@@ -184,25 +184,94 @@ La solución fue diseñada siguiendo el paradigma **Infrastructure as Code**, pe
 
 # Observabilidad
 
-La solución contempla:
+La solución incorpora mecanismos de observabilidad para facilitar el monitoreo, troubleshooting y operación de la aplicación.
 
-- Centralización de logs mediante Amazon CloudWatch Logs.
-- Publicación de métricas operacionales.
-- Alarmas configurables mediante CloudWatch Alarms.
-- Endpoint `/health` para monitoreo del estado de la aplicación.
-- Documentación OpenAPI generada automáticamente mediante Swagger.
+## Logs
+
+La aplicación envía los logs del contenedor a **Amazon CloudWatch Logs** mediante el driver nativo de Amazon ECS.
+
+Esto permite:
+
+- Centralizar los logs de todas las Tasks.
+- Consultar históricos de ejecuciones.
+- Facilitar el análisis de incidentes.
+
+---
+
+## Health Checks
+
+La aplicación expone un endpoint:
+
+```text
+GET /health
+```
+
+Este endpoint es utilizado por el **Application Load Balancer** para determinar el estado de salud de cada Task.
+
+Las Tasks únicamente reciben tráfico cuando el Health Check es satisfactorio.
+
+---
+
+## Métricas
+
+Amazon ECS publica automáticamente métricas operacionales en **Amazon CloudWatch**, entre ellas:
+
+- CPU Utilization
+- Memory Utilization
+- Running Tasks
+- Desired Tasks
+
+Estas métricas permiten implementar políticas de escalado automático y generar alarmas operacionales.
+
+---
+
+## Logs del Pipeline
+
+Cada ejecución del pipeline queda registrada en **GitHub Actions**, proporcionando trazabilidad completa sobre:
+
+- Ejecución de pruebas.
+- Análisis de calidad.
+- Escaneo de seguridad.
+- Construcción de imágenes.
+- Despliegues.
+- Rollbacks.
 
 ---
 
 # Seguridad
 
-La arquitectura incorpora múltiples capas de seguridad:
+La solución incorpora múltiples capas de seguridad tanto en la infraestructura como durante el proceso de integración y despliegue.
 
-- Comunicación cifrada mediante HTTPS utilizando AWS Certificate Manager.
-- Protección de la aplicación mediante AWS WAF.
-- Ejecución de contenedores en subredes privadas.
-- Gestión segura de secretos mediante AWS Secrets Manager.
-- Principio de mínimo privilegio utilizando AWS IAM.
+## Seguridad de la infraestructura
+
+- Comunicación cifrada mediante HTTPS (preparada para utilizar AWS Certificate Manager).
+- Protección de la aplicación mediante AWS WAF (preparado para una futura integración).
+- Ejecución de contenedores en Amazon ECS Fargate.
+- Gestión de permisos mediante AWS IAM siguiendo el principio de mínimo privilegio.
+- Gestión de imágenes privadas mediante Amazon ECR.
+
+---
+
+## Seguridad del pipeline
+
+El pipeline implementa diferentes controles de calidad y seguridad antes del despliegue.
+
+| Herramienta | Objetivo |
+|------------|----------|
+| Pytest | Validación funcional mediante pruebas unitarias. |
+| Ruff | Análisis de calidad y estilo del código Python. |
+| Bandit | Detección de vulnerabilidades comunes en el código Python. |
+| Trivy | Escaneo de vulnerabilidades sobre la imagen Docker antes de publicarla en Amazon ECR. |
+
+El despliegue únicamente continúa si las etapas anteriores finalizan correctamente.
+
+---
+
+## Gestión de credenciales
+
+GitHub Actions utiliza **GitHub Secrets** para almacenar las credenciales necesarias para acceder a AWS.
+
+Las credenciales nunca forman parte del código fuente ni del repositorio.
 
 ---
 
@@ -216,15 +285,59 @@ docs/design-decisions.md
 
 ---
 
-# Flujo de despliegue
+# CI/CD
 
-El despliegue de la aplicación sigue el siguiente flujo:
+El proyecto implementa un pipeline completo mediante **GitHub Actions**.
 
-1. Construcción de la imagen Docker.
-2. Publicación de la imagen en Amazon ECR.
-3. Actualización de la infraestructura mediante Terraform.
-4. Registro de una nueva revisión de la ECS Task Definition.
-5. Rolling Update automático del ECS Service.
+## Flujo del pipeline
+
+```text
+Push
+    │
+    ▼
+Test
+    │
+    ▼
+Quality & Security Analysis
+    │
+    ▼
+Docker Build
+    │
+    ▼
+Push a Amazon ECR
+    │
+    ▼
+Terraform Apply
+    │
+    ▼
+Amazon ECS Rolling Update
+```
+
+## Jobs implementados
+
+El pipeline se encuentra dividido en los siguientes jobs:
+
+| Job | Descripción |
+|------|-------------|
+| Test API | Ejecuta los tests unitarios mediante Pytest. |
+| Quality & Security Analysis | Ejecuta análisis de calidad con Ruff y análisis de seguridad con Bandit. |
+| Build and Push Docker Image | Construye la imagen Docker, ejecuta Trivy y publica la imagen en Amazon ECR. |
+| Deploy with Terraform | Actualiza la infraestructura y despliega la nueva versión en Amazon ECS. |
+
+---
+
+## Estrategia de versionado
+
+Cada despliegue genera una imagen Docker versionada utilizando el **SHA corto del commit de Git**.
+
+Ejemplo:
+
+```text
+platform-insights-api-dev:f16da7c
+```
+
+Esto permite identificar exactamente qué versión del código se encuentra desplegada en cada momento.
+
 
 # Uso de Inteligencia Artificial durante el desarrollo
 
