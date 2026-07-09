@@ -4,7 +4,7 @@
 
 La siguiente imagen representa la arquitectura de despliegue implementada para el proyecto.
 
-![Architecture](diagrams/architecture.png)
+![Architecture](../diagrams/architecture.png)
 
 ## Objetivo
 
