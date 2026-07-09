@@ -61,3 +61,11 @@ module "ecs" {
   subnet_ids = data.aws_subnets.default.ids
 }
 
+module "waf" {
+  source = "../../modules/waf"
+
+  project_name = var.project_name
+  environment  = var.environment
+  alb_arn      = module.alb.alb_arn
+}
+
